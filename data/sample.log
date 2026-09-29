@@ -1,0 +1,73 @@
+# ==============================================================================
+# Sample Authentication Logs for Security Log Analyzer
+# Format: TIMESTAMP | SOURCE_IP | USERNAME | EVENT_TYPE | STATUS
+# ==============================================================================
+
+# Normal user activity - Morning logins
+2026-09-29 08:00:12 | 192.168.1.50 | alice | SSH_LOGIN | SUCCESS
+2026-09-29 08:01:45 | 192.168.1.55 | bob | WEB_PORTAL | SUCCESS
+2026-09-29 08:02:10 | 10.0.0.12 | charlie | VPN_AUTH | SUCCESS
+2026-09-29 08:05:33 | 192.168.1.50 | alice | SUDO_AUTH | SUCCESS
+2026-09-29 08:07:20 | 192.168.1.60 | david | WEB_PORTAL | SUCCESS
+2026-09-29 08:10:05 | 10.0.0.14 | emma | SSH_LOGIN | SUCCESS
+
+# Normal minor typo by bob (1 failure followed by success)
+2026-09-29 08:12:00 | 192.168.1.55 | bob | SSH_LOGIN | FAILURE
+2026-09-29 08:12:15 | 192.168.1.55 | bob | SSH_LOGIN | SUCCESS
+
+# Scenario 1: SSH Brute Force Attack from 203.0.113.45 targeting 'root' and 'admin'
+2026-09-29 08:15:01 | 203.0.113.45 | root | SSH_LOGIN | FAILURE
+2026-09-29 08:15:04 | 203.0.113.45 | root | SSH_LOGIN | FAILURE
+2026-09-29 08:15:08 | 203.0.113.45 | root | SSH_LOGIN | FAILURE
+2026-09-29 08:15:12 | 203.0.113.45 | root | SSH_LOGIN | FAILURE
+2026-09-29 08:15:16 | 203.0.113.45 | root | SSH_LOGIN | FAILURE
+2026-09-29 08:15:21 | 203.0.113.45 | admin | SSH_LOGIN | FAILURE
+2026-09-29 08:15:25 | 203.0.113.45 | admin | SSH_LOGIN | FAILURE
+2026-09-29 08:15:30 | 203.0.113.45 | admin | SSH_LOGIN | FAILURE
+2026-09-29 08:15:35 | 203.0.113.45 | admin | SSH_LOGIN | FAILURE
+
+# Scenario 2: High Failure Volume / Repeated failures against 'database_admin' from 198.51.100.22
+2026-09-29 08:20:00 | 198.51.100.22 | database_admin | DB_AUTH | FAILURE
+2026-09-29 08:20:10 | 198.51.100.22 | database_admin | DB_AUTH | FAILURE
+2026-09-29 08:20:20 | 198.51.100.22 | database_admin | DB_AUTH | FAILURE
+2026-09-29 08:20:30 | 198.51.100.22 | database_admin | DB_AUTH | FAILURE
+2026-09-29 08:20:40 | 198.51.100.22 | database_admin | DB_AUTH | FAILURE
+
+# Scenario 3: Potential Compromise / Account Takeover - Multiple failures followed by SUCCESS
+2026-09-29 08:25:05 | 198.51.100.88 | dev_user | SSH_LOGIN | FAILURE
+2026-09-29 08:25:12 | 198.51.100.88 | dev_user | SSH_LOGIN | FAILURE
+2026-09-29 08:25:19 | 198.51.100.88 | dev_user | SSH_LOGIN | FAILURE
+2026-09-29 08:25:27 | 198.51.100.88 | dev_user | SSH_LOGIN | FAILURE
+2026-09-29 08:25:35 | 198.51.100.88 | dev_user | SSH_LOGIN | SUCCESS
+
+# Normal internal user logins continued
+2026-09-29 08:27:00 | 192.168.1.75 | frank | WEB_PORTAL | SUCCESS
+2026-09-29 08:28:10 | 10.0.0.18 | grace | VPN_AUTH | SUCCESS
+
+# Scenario 4: Password Spraying Attack from 192.0.2.77
+# The attacker attempts 1 or 2 passwords per distinct user account to evade account lockouts
+2026-09-29 08:30:00 | 192.0.2.77 | ceo | WEB_PORTAL | FAILURE
+2026-09-29 08:30:05 | 192.0.2.77 | cfo | WEB_PORTAL | FAILURE
+2026-09-29 08:30:10 | 192.0.2.77 | hr_director | WEB_PORTAL | FAILURE
+2026-09-29 08:30:15 | 192.0.2.77 | billing_dept | WEB_PORTAL | FAILURE
+2026-09-29 08:30:20 | 192.0.2.77 | support_lead | WEB_PORTAL | FAILURE
+2026-09-29 08:30:25 | 192.0.2.77 | vpn_admin | WEB_PORTAL | FAILURE
+2026-09-29 08:30:30 | 192.0.2.77 | git_backup | WEB_PORTAL | FAILURE
+2026-09-29 08:30:35 | 192.0.2.77 | legal_counsel | WEB_PORTAL | FAILURE
+
+# Another brute force attempt against web service
+2026-09-29 08:35:10 | 203.0.113.199 | guest | WEB_PORTAL | FAILURE
+2026-09-29 08:35:15 | 203.0.113.199 | guest | WEB_PORTAL | FAILURE
+2026-09-29 08:35:20 | 203.0.113.199 | guest | WEB_PORTAL | FAILURE
+2026-09-29 08:35:25 | 203.0.113.199 | guest | WEB_PORTAL | FAILURE
+
+# Legitimate operations
+2026-09-29 08:40:00 | 192.168.1.50 | alice | WEB_PORTAL | SUCCESS
+2026-09-29 08:42:15 | 10.0.0.12 | charlie | SUDO_AUTH | SUCCESS
+2026-09-29 08:45:00 | 192.168.1.90 | heidi | SSH_LOGIN | SUCCESS
+
+# Intentional malformed log lines for parser fault-tolerance testing
+CORRUPTED_LINE_WITHOUT_DELIMITERS_HERE
+2026-09-29 08:50:00 | 999.999.999.999 | bad_ip_user | SSH_LOGIN | FAILURE
+2026-15-99 99:99:99 | 192.168.1.50 | bad_date_user | SSH_LOGIN | FAILURE
+2026-09-29 08:52:00 | 192.168.1.50 | missing_status | SSH_LOGIN
